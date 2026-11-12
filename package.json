@@ -1,0 +1,24 @@
+{
+  "name": "oasis-backend-wasm",
+  "type": "module",
+  "collaborators": [
+    "AndrewAltimit"
+  ],
+  "description": "WebAssembly backend for OASIS_OS: Canvas 2D rendering, DOM input, HTML media-element audio",
+  "version": "1.6.0",
+  "license": "MIT OR Unlicense",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AndrewAltimit/oasis-os"
+  },
+  "files": [
+    "oasis_backend_wasm_bg.wasm",
+    "oasis_backend_wasm.js",
+    "oasis_backend_wasm.d.ts"
+  ],
+  "main": "oasis_backend_wasm.js",
+  "types": "oasis_backend_wasm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

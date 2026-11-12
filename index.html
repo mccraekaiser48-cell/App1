@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>OASIS_OS Web — a Rust desktop in your browser</title>
+  <meta name="description" content="A complete desktop operating-system shell written in Rust and compiled to WebAssembly: window manager, terminal, built-in browser and 15 apps, running in a browser tab.">
+  <meta name="theme-color" content="#07080d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230b0e15'/%3E%3Cpath d='M8 21 13 10h2l5 11h-2.4l-1.1-2.6h-5L10.4 21H8zm4.4-4.6h3.6L14.2 12l-1.8 4.4z' fill='%237ef2c0'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./app.css">
+</head>
+<body>
+  <div class="app">
+    <header class="bar">
+      <a class="brand" href="./" aria-label="OASIS_OS Web home">
+        <span class="brand__mark" aria-hidden="true"></span>
+        <span class="brand__name">OASIS<span>_</span>OS</span>
+        <span class="brand__tag">web</span>
+      </a>
+
+      <div class="bar__spacer"></div>
+
+      <label class="field">
+        <span class="field__label">Skin</span>
+        <select id="skin" aria-label="Desktop skin">
+          <optgroup label="PSP dashboard">
+            <option value="psix-hifi">PSIX HiFi</option>
+            <option value="psix-tribute">PSIX Tribute</option>
+            <option value="classic">Classic</option>
+            <option value="altimit">Altimit</option>
+          </optgroup>
+          <optgroup label="Desktop">
+            <option value="xp">XP</option>
+            <option value="win95">Win95</option>
+            <option value="macos">macOS</option>
+            <option value="gnome">GNOME</option>
+            <option value="desktop">Desktop</option>
+            <option value="modern">Modern</option>
+          </optgroup>
+          <optgroup label="Aesthetic">
+            <option value="balatro">Balatro</option>
+            <option value="vaporwave">Vaporwave</option>
+            <option value="solarized">Solarized</option>
+            <option value="paper">Paper</option>
+            <option value="retro-cga">Retro CGA</option>
+          </optgroup>
+          <optgroup label="Terminal &amp; accessibility">
+            <option value="corrupted">Corrupted</option>
+            <option value="highcontrast">High Contrast</option>
+          </optgroup>
+        </select>
+      </label>
+
+      <nav class="bar__actions" aria-label="App shortcuts">
+        <button type="button" class="btn btn--ghost" data-launch="Browser" disabled>
+          <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M2.4 6h11.2M2.4 10h11.2M8 2c1.8 1.7 2.6 3.7 2.6 6S9.8 12.3 8 14C6.2 12.3 5.4 10.3 5.4 8S6.2 3.7 8 2z" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+          Browser
+        </button>
+        <button type="button" class="btn btn--ghost hide-sm" data-launch="Terminal" disabled>Terminal</button>
+        <button type="button" class="btn btn--ghost hide-sm" data-launch="File Manager" disabled>Files</button>
+        <button type="button" class="btn btn--ghost hide-sm" data-launch="Settings" disabled>Settings</button>
+      </nav>
+
+      <div class="bar__divider" aria-hidden="true"></div>
+
+      <button type="button" class="icon-btn" id="help-btn" aria-expanded="false" aria-controls="help" title="Controls">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M6.2 6.1a1.9 1.9 0 1 1 2.6 1.8c-.6.3-.8.7-.8 1.4" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="11.6" r=".9" fill="currentColor"/></svg>
+        <span class="sr-only">Controls</span>
+      </button>
+      <button type="button" class="icon-btn" id="fs-btn" title="Full screen">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6V2.5H6M10 2.5h3.5V6M13.5 10v3.5H10M6 13.5H2.5V10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="sr-only">Full screen</span>
+      </button>
+      <button type="button" class="icon-btn" id="reload-btn" title="Restart the desktop">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M13 8a5 5 0 1 1-1.5-3.6M13 2.5V5h-2.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="sr-only">Restart</span>
+      </button>
+    </header>
+
+    <main class="stage" id="stage">
+      <div class="viewport" id="viewport">
+        <canvas id="oasis" width="480" height="272" tabindex="0" aria-label="OASIS_OS desktop. Click to focus, then use the keyboard.">
+          Your browser needs WebAssembly and Canvas 2D to run this desktop.
+        </canvas>
+
+        <div class="overlay" id="boot" role="status" aria-live="polite">
+          <div class="boot-card">
+            <span class="boot-mark" aria-hidden="true"></span>
+            <h1 class="boot-title">OASIS<span>_</span>OS</h1>
+            <p class="boot-msg" id="boot-msg">Loading the Rust desktop…</p>
+            <div class="boot-bar" aria-hidden="true"><span></span></div>
+            <p class="boot-sub">One 5.4 MB WebAssembly module. Everything runs in this tab.</p>
+          </div>
+        </div>
+
+        <div class="overlay overlay--error" id="error" hidden>
+          <div class="boot-card boot-card--error">
+            <h2>The desktop could not start</h2>
+            <p class="boot-msg" id="error-msg"></p>
+            <p class="boot-sub">Serve this folder over http:// or https:// — opening the file directly with file:// blocks WebAssembly. A school network filter can also block the module download.</p>
+            <button type="button" class="btn btn--primary" id="retry">Try again</button>
+          </div>
+        </div>
+      </div>
+
+      <section class="help" id="help" aria-labelledby="help-title" hidden>
+        <div class="help__head">
+          <h2 id="help-title">Controls</h2>
+          <button type="button" class="icon-btn help__close" id="help-close" aria-label="Close controls">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 4 8 8M12 4l-8 8" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="help__grid">
+          <div>
+            <h3>Keyboard</h3>
+            <ul>
+              <li><span class="keys"><kbd>←</kbd><kbd>↑</kbd><kbd>→</kbd><kbd>↓</kbd></span> move around</li>
+              <li><span class="keys"><kbd>Enter</kbd></span> select</li>
+              <li><span class="keys"><kbd>Esc</kbd></span> back / cancel</li>
+              <li><span class="keys"><kbd>F1</kbd></span> terminal</li>
+              <li><span class="keys"><kbd>Alt</kbd>+<kbd>Tab</kbd></span> switch windows</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Mouse &amp; touch</h3>
+            <ul>
+              <li>Click or tap icons to open apps</li>
+              <li>Drag a title bar to move a window</li>
+              <li>Drag an edge or corner to resize</li>
+              <li>Double-click a title bar to maximize</li>
+              <li>Type in the terminal once the canvas is focused</li>
+            </ul>
+          </div>
+          <div>
+            <h3>In this build</h3>
+            <ul>
+              <li>The browser app is the <strong>Browser</strong> shortcut above</li>
+              <li>Web pages open in a real iframe above the canvas</li>
+              <li>Pages that refuse framing show the browser's own error</li>
+              <li>No JavaScript engine for in-OS pages; no raw TCP</li>
+              <li>Files live in memory until you reload</li>
+            </ul>
+          </div>
+        </div>
+        <div class="help__foot">
+          <a href="https://github.com/AndrewAltimit/oasis-os" target="_blank" rel="noopener noreferrer">Source &amp; docs</a>
+          <button type="button" class="btn btn--primary" id="help-done">Got it</button>
+        </div>
+      </section>
+    </main>
+
+    <footer class="status">
+      <span class="status__item"><span class="dot" id="dot" aria-hidden="true"></span><span id="status-text">Booting</span></span>
+      <span class="status__sep" aria-hidden="true">·</span>
+      <span class="status__item">Rust → WebAssembly</span>
+      <span class="status__sep hide-sm" aria-hidden="true">·</span>
+      <span class="status__item hide-sm">Canvas 2D</span>
+      <span class="status__spacer"></span>
+      <span class="status__note hide-sm">Built on <a href="https://github.com/AndrewAltimit/oasis-os" target="_blank" rel="noopener noreferrer">OASIS_OS</a> (MIT / Unlicense)</span>
+    </footer>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <noscript>
+    <p class="noscript">This desktop needs JavaScript and WebAssembly enabled.</p>
+  </noscript>
+
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
