@@ -1,5 +1,37 @@
+
+// Fill N rectangles with their own colors in a single round trip.
+//
+// `data` is a Float32Array of [x, y, w, h, r, g, b, a, ...] — eight
+// floats per rect, alpha in 0..=255 (matches the rest of the channels
+// so the marshal layout is uniform). `n` is the rect count.
+function oasis_submit_rects(ctx, data, n) {
+  for (let i = 0; i < n; i++) {
+    const o = i * 8;
+    const r = data[o + 4] | 0;
+    const g = data[o + 5] | 0;
+    const b = data[o + 6] | 0;
+    const a = data[o + 7] | 0;
+    if (a >= 255) {
+      ctx.fillStyle = "rgb(" + r + "," + g + "," + b + ")";
+    } else {
+      ctx.fillStyle = "rgba(" + r + "," + g + "," + b + "," + (a / 255) + ")";
+    }
+    ctx.fillRect(data[o], data[o + 1], data[o + 2], data[o + 3]);
+  }
+}
+
+// Draw N pre-rendered glyph canvases at their target positions.
+//
+// `glyphs` is a JS Array of HTMLCanvasElement (one per glyph instance,
+// in draw order). `positions` is a Float32Array of [x0, y0, x1, y1, ...]
+// (two floats per glyph). `n` is the glyph count.
+function oasis_submit_glyphs(ctx, glyphs, positions, n) {
+  for (let i = 0; i < n; i++) {
+    const o = i * 2;
+    ctx.drawImage(glyphs[i], positions[o], positions[o + 1]);
+  }
+}
 /* @ts-self-types="./oasis_backend_wasm.d.ts" */
-import { oasis_submit_glyphs, oasis_submit_rects } from './snippets/oasis-backend-wasm-3c60c68f2f4465b9/inline0.js';
 
 /**
  * OASIS_OS instance for the browser.
